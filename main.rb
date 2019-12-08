@@ -2,48 +2,30 @@
 
 require 'oga'
 require 'open-uri'
-require_relative 'lib/movie'
+require_relative 'lib/film'
+require_relative 'lib/film_collection'
 
-films = []
-count = 0
-
-# Все что связано с конкрктным сайтом
-URI_MASSIV = [
-  'https://www.imdb.com/list/ls052535080/?sort=list_order,asc&st_dt=&mode=detail&page=10'
-  ]
-1.times do
-  url = URI_MASSIV[count]
-  count += 1
-  html = open(url)
-
-  doc = Oga.parse_html(html)
-  doc.css('.lister-item-content').each do |m|
-    year = m.at_css('.lister-item-year').text.delete('()').to_i
-    title = m.at_css('a').text.strip
-    director = m.css('p')[2].text.split('|')[0].split("\n")[2]
-
-    films << Movie.new(year, title, director)
-  end
-end
-# ----------------------------------------------------------------
 
 puts 'Программа "Фильм на вечер"'
 
-directors_list = films.map { |f| f.director }.uniq.sort
+films = FilmCollection.films_used_oga
 
-directors_list.each.with_index(1) do |director, index|
-  puts "#{index}. #{director}"
-end
+directors = films.directors
 
+directors_list = films.directors_list
+
+puts directors_list.join("\n")
 puts
 puts "Фильм какого режиссера вы хотите сегодня посмотреть?"
-user_input = gets.to_i
 
-if user_input > 0 && directors_list.fetch(user_input - 1)
-  director = directors_list.fetch(user_input - 1)
+user_input = gets.to_i
+until (1..directors.size).include?(user_input) do
+  puts "Такого режиссера нет в списке! Повторите ввод еще раз"
+  user_input = gets.to_i
 end
 
-film_today = films.map { |film| film if film.director == director }.compact
+chosen_director = directors_list[user_input - 1]
 
 puts "Сегодня вечером рекомендую посмотреть:"
-puts film_today.sample(1)
+
+puts films.film_today(chosen_director)
