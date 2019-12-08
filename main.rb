@@ -24,7 +24,8 @@ until (1..directors.size).include?(user_input) do
   user_input = gets.to_i
 end
 
-chosen_director = directors_list[user_input - 1]
+chosen_director = directors[user_input - 1]
+puts chosen_director
 
 puts "Сегодня вечером рекомендую посмотреть:"
 
